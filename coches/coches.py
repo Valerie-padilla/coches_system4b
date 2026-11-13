@@ -89,6 +89,15 @@ class Coches:
         except Exception as e: 
             print(f"Ocurrió un error: {e}")
             return False
+
+    @staticmethod
+    def buscar(id):
+        try: 
+            cursor.execute("select * from coches where id=%s", (id,))    
+            return cursor.fetchall()
+        except Exception as e: 
+            print(f"Ocurrió un error: {e}")
+            return []
         
 
 
