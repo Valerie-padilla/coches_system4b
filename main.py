@@ -1,5 +1,5 @@
 from coches import coches
-from tkinter import Tk, Label, Entry, Button, messagebox
+from tkinter import Tk, Label, Entry, Button, messagebox, StringVar
 print("\033c")
 
 class App:
@@ -76,6 +76,14 @@ class App:
 
         Button(self.ventana,text=":: Regresar ::", command=self.menu_acciones).pack(pady=5)
 
+    def confirmacion_eliminar(self, tipo):
+        resp=messagebox.askquestion(title="...¡Atencion!...", message=f"...¿Desea {tipo} este registro?...")
+        if resp=="yes":
+            return True
+        else:
+            return False
+
+
     def eliminar_coche_view(self):
         self.borrarPantalla()
         Label(self.ventana,text="... Ingrese el ID del coche a eliminar").pack(pady=10)
@@ -84,11 +92,49 @@ class App:
         self.id.focus()
         self.id.pack(pady=5)
 
-        Button(self.ventana, text=":: Eliminar ::", command=lambda:{self.eliminar_coche_controller(), self.eliminar_coche_view()}).pack(pady=5)
+        self.btn_buscar=Button(self.ventana, text="Buscar", command=lambda:self.buscar_controller("eliminar")) 
+        self.btn_buscar.pack(pady=5)
+
+        self.btn_eliminar=Button(self.ventana, text=":: Eliminar ::", state="disabled", command=lambda:{self.eliminar_coche_controller(), self.eliminar_coche_view()})
+        self.btn_eliminar.pack(pady=5)
         Button(self.ventana, text=":: Regresar ::", command=self.menu_acciones).pack(pady=5)
 
+    def buscar_controller(self, tipo_accion):
+        id=self.id.get()
+        coches1=coches.Coches.buscar(id)
+        if len(coches1)>0:
+            messagebox.showinfo(title="... ¡Registro Encontrado! ...", message=f"...¡El registro fue encontrado con exito!... puedes {tipo_accion}") 
+            self.cambiar_estado_btn(True, tipo_accion)
+            if tipo_accion=="modificar":
+                self.var_marca.set(coches1[0][1])
+                self.var_color.set(coches1[0][2])
+                self.var_modelo.set(coches1[0][3])
+                self.var_velocidad.set(coches1[0][4])
+                self.var_potencia.set(coches1[0][5])
+                self.var_asientos.set(coches1[0][6])
+        else:
+            messagebox.showerror(title="...¡Verifica pr favor!...", message=f"...¡El registro no fue encontrado, no es posible {tipo_accion}...!")
+            self.cambiar_estado_btn(False, tipo_accion)
+
+    def cambiar_estado_btn(self, estado, tipo_accion):
+        if estado:
+            if tipo_accion=="eliminar":
+                self.btn_eliminar.config(state="normal")
+            elif tipo_accion=="modificar":
+                self.btn_modificar.config(state="normal")
+        else:
+            if tipo_accion=="eliminar":
+                self.btn_eliminar.config(state="disabled")
+            elif tipo_accion=="modificar":
+                self.btn_buscar.config(state="disabled")
+
     def eliminar_coche_controller(self):
-        respuesta=coches.Coches.eliminar(self.id.get())
+        id=self.id.get()
+        resp=self.confirmacion_eliminar("eliminar")
+        if resp== True:
+            respuesta=coches.Coches.eliminar(id)
+        else: 
+            respuesta=False
         self.respuesta_sql(respuesta)
         
     def insertar_coche_controller(self):
@@ -126,33 +172,47 @@ class App:
         self.id.focus()
         self.id.pack(pady=5)
 
+        self.btn_buscar=Button(self.ventana, text="Buscar", command=lambda:self.buscar_controller("modificar")) 
+        self.btn_buscar.pack(pady=5)
+
         Label(self.ventana,text="... Los datos del coche").pack(pady=10)
+
+        # Variables asociadas a los campos
+        self.var_marca = StringVar()
+        self.var_color = StringVar()
+        self.var_modelo = StringVar()
+        self.var_velocidad = StringVar()
+        self.var_potencia = StringVar()
+        self.var_asientos = StringVar()
+
         Label(self.ventana,text="Marca: ").pack(pady=5)
-        self.marca=Entry(self.ventana)
+        self.marca=Entry(self.ventana, textvariable=self.var_marca)
         self.marca.focus()
         self.marca.pack(pady=5)
 
+
         Label(self.ventana,text="Color: ").pack(pady=5)
-        self.color=Entry(self.ventana)
+        self.color=Entry(self.ventana, textvariable=self.var_color)
         self.color.pack(pady=5)
         
         Label(self.ventana,text="Modelo: ").pack(pady=5)
-        self.modelo=Entry(self.ventana)
+        self.modelo=Entry(self.ventana, textvariable=self.var_modelo)
         self.modelo.pack(pady=5)
 
         Label(self.ventana,text="Velocidad: ").pack(pady=5)
-        self.velocidad=Entry(self.ventana)
+        self.velocidad=Entry(self.ventana, textvariable=self.var_velocidad)
         self.velocidad.pack(pady=5)
 
         Label(self.ventana,text="Potencia: ").pack(pady=5)
-        self.potencia=Entry(self.ventana)
+        self.potencia=Entry(self.ventana, textvariable=self.var_potencia)
         self.potencia.pack(pady=5)
 
         Label(self.ventana,text="# de Asientos: ").pack(pady=5)
-        self.asientos=Entry(self.ventana)
+        self.asientos=Entry(self.ventana, textvariable=self.var_asientos)
         self.asientos.pack(pady=5)
 
-        Button(self.ventana,text=": Modificar :", command=lambda:{self.modifcar_coche_controller(), self.modifcar_coche_view()}).pack(pady=5)
+        self.btn_modificar=Button(self.ventana,text=": Modificar :", state="disabled",command=lambda:{self.modifcar_coche_controller(), self.modifcar_coche_view()})
+        self.btn_modificar.pack(pady=5)
 
         Button(self.ventana,text=":: Regresar ::", command=self.menu_acciones).pack(pady=5)
 
