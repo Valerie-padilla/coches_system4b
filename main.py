@@ -1,5 +1,5 @@
 from coches import coches
-from tkinter import Tk, Label, Entry, Button, messagebox, StringVar, Menu, Frame
+from tkinter import Tk, Label, Entry, Button, messagebox, StringVar, Menu, Frame, ttk
 print("\033c")
 
 class App:
@@ -187,23 +187,29 @@ class App:
         self.borrarPantalla()
         self.barraMenu()
         Label(self.ventana, text=" ..:: Consultar Coches ::..").pack(pady=10)
-        filas=""
-        filas=self.consultar_coche_controller(filas)
-        Label(self.ventana, text=f"{filas}").pack(pady=5)
+
+        # Tabla
+        self.tree =ttk.Treeview(self.ventana, columns=("ID", "Marca", "Color", "Modelo","Velocidad","Potencia","Asientos"), show="headings")
+        self.tree.heading("ID", text="ID")
+        self.tree.heading("Marca", text="Marca")
+        self.tree.heading("Color", text="Color")
+        self.tree.heading("Modelo", text="Modelo")
+        self.tree.heading("Velocidad", text="Velocidad")
+        self.tree.heading("Potencia", text="Potencia")
+        self.tree.heading("Asientos", text="Asientos")
+        self.tree.pack(fill="both", expand=False)
+
+        self.consultar_coche_controller()
+
         Button(self.ventana, text=":: Regresar ::", command=self.menu_acciones).pack(pady=5)
 
-    def consultar_coche_controller(self, filas):
-        self.borrarPantalla()
-        registros=coches.Coches.consultar()
+    def consultar_coche_controller(self):
+        for row in self.tree.get_children():
+            self.tree.delete(row)
+        for row in coches.Coches.consultar():
+            self.tree.insert("", "end", values=row)     
                     
-        num_coche=1
-        if len(registros)>0:
-            for fila in registros:
-                filas=filas+(f"\n\tCoche numero #: {num_coche}\nID: {fila[0]},\tMarca: {fila[1]}\n\tColor: {fila[2]}\tModelo: {fila[3]},\n\tVelocidad: {fila[4]},\tPotencia: {fila[5]}\tAsientos: {fila[6]}")
-                num_coche+=1
-        else:
-            filas="...!No se encontraro informacion en la BD..."
-        return filas
+
 
     def modificar_coche_view(self):
         self.borrarPantalla()
