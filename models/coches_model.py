@@ -1,6 +1,6 @@
 from conexionBD import conexion, cursor
 
-class Coches:
+class CochesModel:
     def __init__(self,marca,color,modelo,velocidad,potencia,asientos ):
         self._marca = marca
         self._color = color
@@ -89,6 +89,15 @@ class Coches:
         except Exception as e: 
             print(f"Ocurrió un error: {e}")
             return False
+
+    @staticmethod
+    def buscar(id):
+        try: 
+            cursor.execute("select * from coches where id=%s", (id,))    
+            return cursor.fetchall()
+        except Exception as e: 
+            print(f"Ocurrió un error: {e}")
+            return []
         
 
 
